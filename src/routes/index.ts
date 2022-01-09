@@ -1,10 +1,9 @@
 import express, { NextFunction, Request, Response } from "express";
+import learnerRouter from "./learner.routes";
 
 const router = express.Router();
 
 /* GET home page. */
-router.get("/", function (req: Request, res: Response, next: NextFunction) {
-  res.render("index", { title: "Express" });
-});
+router.use("/learner", learnerRouter);
 
 export default router;

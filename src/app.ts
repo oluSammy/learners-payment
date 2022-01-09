@@ -1,16 +1,19 @@
 import createError, { HttpError } from "http-errors";
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
 import cors from "cors";
+import { config } from "dotenv";
 
 import indexRouter from "./routes/index";
-import usersRouter from "./routes/users";
+import { connectDb } from "./database/connectDb";
 
-var app = express();
+const app = express();
 
 app.use(cors());
+
+config();
 
 // view engine setup
 app.set("views", path.join(__dirname, "../views"));
@@ -22,8 +25,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
+// connect Db
+connectDb();
+
+app.use("/api/v1", indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -31,12 +36,7 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (
-  err: HttpError,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+app.use(function (err: HttpError, req: Request, res: Response) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
