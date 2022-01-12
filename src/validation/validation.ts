@@ -22,3 +22,35 @@ export const validateSignup = (obj: Joi.Schema) => {
 
   return schema.validate(obj);
 };
+
+export const validateLogin = (obj: Joi.Schema) => {
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().min(6).max(30).required(),
+  });
+
+  return schema.validate(obj);
+};
+
+export const validateVerifyIdentityToken = (obj: Joi.Schema) => {
+  const schema = Joi.object({
+    learnerId: Joi.string().required(),
+  });
+
+  return schema.validate(obj);
+};
+
+export const validateInitPayment = (obj: Joi.Schema) => {
+  const schema = Joi.object({
+    learnerId: Joi.string().required(),
+    amount: Joi.number().required(),
+    name: Joi.string().required(),
+    email: Joi.string().email().required(),
+    trainingTitle: Joi.string().required(),
+    trainingId: Joi.string().required(),
+    phoneNumber: Joi.string().required(),
+    // redirectUrl: Joi.string().required(),
+  });
+
+  return schema.validate(obj);
+};
