@@ -92,11 +92,13 @@ export const flutterHook = async (req: Request, res: Response) => {
     console.log("NO HASH");
   } else {
     // Get signature stored as env variable on your server
-    const secret_hash = process.env.MY_HASH;
+    const secret_hash = process.env.MY_HASH as string;
 
     if (hash !== secret_hash) {
       // silently exit, or check that you are passing the right hash on your server.
       console.log("hash !== secret_hash");
+      console.log(hash);
+      console.log(process.env.MY_HASH as string);
     } else {
       // update transaction status
       console.log("update transaction status");
