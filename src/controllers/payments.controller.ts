@@ -84,7 +84,9 @@ export const initPayment = async (req: Request, res: Response) => {
 };
 
 export const flutterHook = (req: Request, res: Response) => {
-  console.log(req.body);
+  console.log("REQ******* REQUEST");
+
+  console.log(req);
 
   res.status(200).end();
 };
