@@ -32,6 +32,7 @@ const paymentSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
     },
+    flwRef: String,
   },
   {
     timestamps: true,

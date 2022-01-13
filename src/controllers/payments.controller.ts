@@ -83,10 +83,46 @@ export const initPayment = async (req: Request, res: Response) => {
   }
 };
 
-export const flutterHook = (req: Request, res: Response) => {
+export const flutterHook = async (req: Request, res: Response) => {
   console.log("REQ******* REQUEST");
 
-  console.log(req.body);
+  // retrieve the signature from the header
+  const hash = req.headers["verif-hash"];
 
-  res.status(200).end();
+  if (!hash) {
+    // discard the request,only a post with the right Flutterwave signature header gets our attention
+  } else {
+    // Get signature stored as env variable on your server
+    const secret_hash = process.env.MY_HASH;
+
+    if (hash !== secret_hash) {
+      // silently exit, or check that you are passing the right hash on your server.
+      res.status(200).end();
+    } else {
+      // update transaction status
+      await Payments.findByIdAndUpdate(req.body.txRef, {
+        flwRef: req.body.flwRef,
+        status: req.body.status,
+      });
+
+      console.log("req.body, I Hit it fast");
+      console.log(req.body);
+
+      if (req.body.status === "successful") {
+        console.log("update mission centre");
+
+        // update learner status
+        // await Course.findOneAndUpdate(
+        //   { trainingId: req.body.meta.consumer_id },
+        //   {
+        //     learnerId: req.body.meta.consumer_id,
+        //     learnerStatus: "completed",
+        //   }
+        // );
+      }
+
+      // txRef, flwRef, amount, status,
+      // update mission centre as course purchased
+    }
+  }
 };
