@@ -64,6 +64,8 @@ export const initPayment = async (req: Request, res: Response) => {
           title: training.title,
           description: `payment for ${training.title}`,
         },
+        webhook_url:
+          "https://webhook.site/cac2721e-3e82-4423-8c3e-d1005ec12bc9",
       },
     });
 
@@ -79,4 +81,10 @@ export const initPayment = async (req: Request, res: Response) => {
       message: "an error occurred",
     });
   }
+};
+
+export const flutterHook = (req: Request, res: Response) => {
+  console.log(req.body);
+
+  res.status(200).end();
 };

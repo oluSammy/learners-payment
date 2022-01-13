@@ -30,6 +30,10 @@ connectDb();
 
 app.use("/api/v1", indexRouter);
 
+app.use("/", (__, res) => {
+  res.send("API is live and running");
+});
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));

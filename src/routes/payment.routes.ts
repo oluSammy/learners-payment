@@ -5,5 +5,6 @@ import { protectRoute } from "../controllers/auth.controller";
 const router = express.Router();
 
 router.post("/init", protectRoute, initPayment);
+router.post("/hook")
 
 export default router;
