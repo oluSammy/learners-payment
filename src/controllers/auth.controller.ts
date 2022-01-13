@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import Learner from "../models/learner.model";
 import axios from "axios";
 import { generateHeader } from "../utils/generateHeader";
@@ -18,25 +18,79 @@ const generateAppToken = (email: string): string => {
   return token;
 };
 
-const generateAuthToken = async (learnerId: string) => {
+// const generateAuthToken = async (learnerId: string) => {
+//   try {
+//     const { data } = await axios({
+//       method: "post",
+//       url: `${process.env.MISSION_CENTER_BASE_URL}/device/auth/token`,
+//       headers: generateHeader(
+//         `${process.env.MISSION_CENTER_BASE_URL}/device/auth/token`,
+//         {
+//           learnerId,
+//         }
+//       ),
+//       data: { learnerId },
+//     });
+
+//     return data.response;
+//   } catch (e: any) {
+//     console.log(e);
+
+//     throw new Error(e);
+//   }
+// };
+
+export const protectRoute = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const { data } = await axios({
-      method: "post",
-      url: `${process.env.MISSION_CENTER_BASE_URL}/device/auth/token`,
-      headers: generateHeader(
-        `${process.env.MISSION_CENTER_BASE_URL}/device/auth/token`,
-        {
-          learnerId,
-        }
-      ),
-      data: { learnerId },
-    });
+    let token: string | undefined;
 
-    return data.response;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      return res.status(401).json({
+        status: "unauthorized",
+        message: `please login to access this resource`,
+      });
+    }
+
+    const decodedToken: any = jwt.verify(
+      token as string,
+      process.env.JWT_SECRET as string
+    );
+
+    if (!decodedToken) {
+      return res.status(404).json({
+        status: "unauthorized",
+        message: `user no longer exists`,
+      });
+    }
+
+    const user = await Learner.findOne({ email: decodedToken.email });
+
+    if (!user) {
+      return res.status(404).json({
+        status: "unauthorized",
+        message: `user no longer exists`,
+      });
+    }
+
+    req.user = user;
+
+    next();
   } catch (e: any) {
-    console.log(e);
-
-    throw new Error(e);
+    return res.status(500).json({
+      status: "error",
+      message: "an error occurred",
+    });
   }
 };
 
@@ -114,17 +168,18 @@ export const createLearner = async (req: Request, res: Response) => {
       email: req.body.email,
       password: req.body.password,
       learnerId: data.response.learnerId,
+      phoneNumber: req.body.phoneNumber,
     });
 
     learner.password = "";
 
-    const authToken = await generateAuthToken(learner.learnerId);
-    const appToken = generateAppToken(req.body.email);
+    // const authToken = await generateAuthToken(learner.learnerId);
+    const token = generateAppToken(req.body.email);
 
     res.status(201).json({
       message: "Learner created successfully",
       data: learner,
-      token: { appToken, authToken },
+      token,
     });
   } catch (e: any) {
     if (e.response) {
@@ -133,6 +188,8 @@ export const createLearner = async (req: Request, res: Response) => {
         message: e.response.data.msg || e.response.data.meta.msg,
       });
     }
+
+    console.log(e);
 
     return res.status(500).json({
       message: "an error occurred",
@@ -164,13 +221,13 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
-    const authToken = await generateAuthToken(learner.learnerId);
-    const appToken = generateAppToken(req.body.email);
+    // const authToken = await generateAuthToken(learner.learnerId);
+    const token = generateAppToken(req.body.email);
 
     res.status(201).json({
       message: "login successful",
       data: learner,
-      token: { appToken, authToken },
+      token,
     });
   } catch (e) {
     return res.status(500).json({

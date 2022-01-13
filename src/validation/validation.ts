@@ -18,6 +18,7 @@ export const validateSignup = (obj: Joi.Schema) => {
     login: Joi.string().min(1).max(30).required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(6).max(30).required(),
+    phoneNumber: Joi.string().required(),
   });
 
   return schema.validate(obj);
@@ -42,14 +43,17 @@ export const validateVerifyIdentityToken = (obj: Joi.Schema) => {
 
 export const validateInitPayment = (obj: Joi.Schema) => {
   const schema = Joi.object({
-    learnerId: Joi.string().required(),
-    amount: Joi.number().required(),
-    name: Joi.string().required(),
-    email: Joi.string().email().required(),
-    trainingTitle: Joi.string().required(),
     trainingId: Joi.string().required(),
-    phoneNumber: Joi.string().required(),
-    // redirectUrl: Joi.string().required(),
+  });
+
+  return schema.validate(obj);
+};
+
+export const validateCreateCourse = (obj: Joi.Schema) => {
+  const schema = Joi.object({
+    trainingId: Joi.string().required(),
+    title: Joi.string().required(),
+    amount: Joi.number().required(),
   });
 
   return schema.validate(obj);

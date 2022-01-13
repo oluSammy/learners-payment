@@ -27,6 +27,10 @@ const learnerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  phoneNumber: {
+    type: String,
+    required: true,
+  },
 });
 
 // pre save middleware to hash password

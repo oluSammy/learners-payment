@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Payments from "../models/payments.model";
 import { validateInitPayment } from "../validation/validation";
 import axios from "axios";
+import Course from "../models/courses.model";
 
 export const initPayment = async (req: Request, res: Response) => {
   /**
@@ -19,15 +20,23 @@ export const initPayment = async (req: Request, res: Response) => {
     });
   }
 
+  const training = await Course.findOne({ trainingId: req.body.trainingId });
+
+  if (!training) {
+    return res.status(404).json({
+      message: `Training not found`,
+    });
+  }
+
   try {
     const payment = await Payments.create({
-      learnerId: req.body.learnerId,
-      amount: req.body.amount,
-      name: req.body.name,
-      email: req.body.email,
-      trainingTitle: req.body.trainingTitle,
+      learnerId: req.user!.learnerId,
+      amount: training.amount, //
+      name: req.user!.login,
+      email: req.user!.email,
+      trainingTitle: training.title,
       trainingId: req.body.trainingId,
-      phoneNumber: req.body.phoneNumber,
+      phoneNumber: req.user!.phoneNumber,
     });
 
     const { data } = await axios({
@@ -37,8 +46,8 @@ export const initPayment = async (req: Request, res: Response) => {
         Authorization: `Bearer ${process.env.FLUTTERWAVE_PRIVATE_KEY}`,
       },
       data: {
-        tx_ref: req.body.learnerId,
-        amount: req.body.amount,
+        tx_ref: req.user!.learnerId,
+        amount: training.amount,
         payment_options: "card",
         currency: "NGN",
         redirect_url:
@@ -47,14 +56,13 @@ export const initPayment = async (req: Request, res: Response) => {
           consumer_id: req.body.learnerId,
         },
         customer: {
-          email: req.body.email,
-          phonenumber: req.body.phoneNumber,
-          name: req.body.name,
+          email: req.user!.email,
+          phonenumber: req.user!.phoneNumber,
+          name: req.user!.login,
         },
         customizations: {
-          title: req.body.trainingTitle,
-          description: `payment for ${req.body.trainingTitle}`,
-          logo: "https://assets.piedpiper.com/logo.png",
+          title: training.title,
+          description: `payment for ${training.title}`,
         },
       },
     });

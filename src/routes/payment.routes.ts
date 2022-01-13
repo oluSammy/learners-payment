@@ -1,8 +1,9 @@
 import { initPayment } from "./../controllers/payments.controller";
 import express from "express";
+import { protectRoute } from "../controllers/auth.controller";
 
 const router = express.Router();
 
-router.post("/init", initPayment);
+router.post("/init", protectRoute, initPayment);
 
 export default router;

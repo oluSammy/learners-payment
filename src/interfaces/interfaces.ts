@@ -7,4 +7,5 @@ export interface ILearner extends mongoose.Document {
   email: string;
   password: string;
   learnerId: string;
+  phoneNumber: string;
 }
