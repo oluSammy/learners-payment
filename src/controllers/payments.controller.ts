@@ -84,29 +84,31 @@ export const initPayment = async (req: Request, res: Response) => {
 };
 
 export const flutterHook = async (req: Request, res: Response) => {
-  console.log("REQ******* REQUEST");
-
   // retrieve the signature from the header
   const hash = req.headers["verif-hash"];
 
   if (!hash) {
     // discard the request,only a post with the right Flutterwave signature header gets our attention
+    console.log("NO HASH");
   } else {
     // Get signature stored as env variable on your server
     const secret_hash = process.env.MY_HASH;
 
     if (hash !== secret_hash) {
       // silently exit, or check that you are passing the right hash on your server.
-      res.status(200).end();
+      console.log("hash !== secret_hash");
     } else {
       // update transaction status
+      console.log("update transaction status");
+      res.status(200).end();
       await Payments.findByIdAndUpdate(req.body.txRef, {
         flwRef: req.body.flwRef,
         status: req.body.status,
       });
-
-      console.log("req.body, I Hit it fast");
       console.log(req.body);
+
+      console.log("update transaction status");
+      console.log("req.body, I Hit it fast");
 
       if (req.body.status === "successful") {
         console.log("update mission centre");
