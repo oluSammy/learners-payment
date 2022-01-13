@@ -46,7 +46,7 @@ export const initPayment = async (req: Request, res: Response) => {
         Authorization: `Bearer ${process.env.FLUTTERWAVE_PRIVATE_KEY}`,
       },
       data: {
-        tx_ref: req.user!.learnerId,
+        tx_ref: payment._id,
         amount: training.amount,
         payment_options: "card",
         currency: "NGN",
@@ -64,10 +64,10 @@ export const initPayment = async (req: Request, res: Response) => {
           title: training.title,
           description: `payment for ${training.title}`,
         },
-        webhook_url:
-          "https://webhook.site/cac2721e-3e82-4423-8c3e-d1005ec12bc9",
       },
     });
+    // webhook_url:
+    //   "https://webhook.site/cac2721e-3e82-4423-8c3e-d1005ec12bc9",
 
     res.status(201).json({
       message: "Payment initiated successfully",
