@@ -87,6 +87,15 @@ export const protectRoute = async (
 
     next();
   } catch (e: any) {
+    console.log(e.message);
+
+    if (e.message === "jwt expired") {
+      return res.status(500).json({
+        status: "error",
+        message: "token expired",
+      });
+    }
+
     return res.status(500).json({
       status: "error",
       message: "an error occurred",

@@ -75,7 +75,8 @@ export const initPayment = async (req: Request, res: Response) => {
       link: data.data.link,
     });
   } catch (e: any) {
-    console.log(e.response.data);
+    // console.log(e.response.data);
+    console.log(e);
 
     res.status(500).json({
       message: "an error occurred",
