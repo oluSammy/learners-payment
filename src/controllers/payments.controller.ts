@@ -5,8 +5,6 @@ import axios from "axios";
 import Course from "../models/courses.model";
 
 /**
- * verify payment
- * get all the courses a user has paid for
  * check if a user has paid for a particular course
  */
 
@@ -105,13 +103,14 @@ export const flutterHook = async (req: Request, res: Response) => {
 
   if (!hash) {
     // discard the request,only a post with the right Flutterwave signature header gets our attention
-    console.log("NO HASH");
+    res.status(400).end();
   } else {
     // Get signature stored as env variable on your server
     const secret_hash = process.env.MY_HASH as string;
 
     if (hash !== secret_hash) {
       // silently exit, or check that you are passing the right hash on your server.
+      res.status(400).end();
     } else {
       res.status(200).end();
       await Payments.findByIdAndUpdate(req.body.txRef, {
@@ -119,7 +118,6 @@ export const flutterHook = async (req: Request, res: Response) => {
         status: req.body.status,
         transactionID: req.body.id,
       });
-      console.log(req.body);
 
       if (req.body.status === "successful") {
         console.log("update mission centre");
@@ -140,12 +138,64 @@ export const flutterHook = async (req: Request, res: Response) => {
   }
 };
 
-export const verifyPayment = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const verifyPayment = async (req: Request, res: Response) => {
   try {
-    
-  } catch (e: any) {}
+    const { data } = await axios({
+      method: "get",
+      url: `https://api.flutterwave.com/v3/transactions/${req.params.id}/verify`,
+      headers: {
+        Authorization: `Bearer ${process.env.FLUTTERWAVE_PRIVATE_KEY}`,
+      },
+    });
+
+    const payment = await Payments.findByIdAndUpdate(
+      data.data.tx_ref,
+      {
+        flwRef: data.data.tx_ref,
+        status: req.body.flw_ref,
+        transactionID: req.body.id,
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "ok",
+      data: payment,
+    });
+
+    // console.log(data);
+  } catch (e: any) {
+    console.log(e);
+
+    if (e.response) {
+      if (e.response.data.message === "No transaction was found for this id") {
+        return res.status(400).json({
+          status: "error",
+          message: "No transaction was found for this id",
+        });
+      }
+    }
+
+    res.status(500).json({
+      message: "an error occurred",
+    });
+  }
+};
+
+export const getUserTrainings = async (req: Request, res: Response) => {
+  try {
+    const payments = await Payments.find({
+      learnerId: req.user!.learnerId,
+      status: "successful",
+    }).select("-learnerId -name -phoneNumber -createdAt -flwRef -__v");
+
+    res.status(200).json({
+      status: "success",
+      data: payments,
+    });
+  } catch (e) {
+    res.status(500).json({
+      message: "an error occurred",
+    });
+  }
 };

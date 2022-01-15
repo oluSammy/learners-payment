@@ -59,3 +59,13 @@ export const validateCreateCourse = (obj: Joi.Schema) => {
 
   return schema.validate(obj);
 };
+
+// export const verifyTransaction = (obj: Joi.Schema) => {
+//   const schema = Joi.object({
+//     trainingId: Joi.string().required(),
+//     title: Joi.string().required(),
+//     amount: Joi.number().required(),
+//   });
+
+//   return schema.validate(obj);
+// };
