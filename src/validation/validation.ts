@@ -44,6 +44,7 @@ export const validateVerifyIdentityToken = (obj: Joi.Schema) => {
 export const validateInitPayment = (obj: Joi.Schema) => {
   const schema = Joi.object({
     trainingId: Joi.string().required(),
+    redirectUrl: Joi.string().required(),
   });
 
   return schema.validate(obj);

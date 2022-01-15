@@ -1,17 +1,17 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import Payments from "../models/payments.model";
 import { validateInitPayment } from "../validation/validation";
 import axios from "axios";
 import Course from "../models/courses.model";
 
-export const initPayment = async (req: Request, res: Response) => {
-  /**
-   * get trainingId, amount, name, email, redirectUrl, learnerId, trainingTitle, maybe training price
-   * create new transaction doc
-   * initiate payment with payment provider
-   * send payment provider response to client
-   */
+/**
+ * verify payment
+ * get all the courses a user has paid for
+ * check if a user has paid for a particular course
+ */
 
+export const initPayment = async (req: Request, res: Response) => {
+  // verify req body
   const { error } = validateInitPayment(req.body);
 
   if (error) {
@@ -20,6 +20,20 @@ export const initPayment = async (req: Request, res: Response) => {
     });
   }
 
+  // check if user has already paid for a course
+  const hasPaid = await Payments.findOne({
+    learnerId: req.user!.learnerId,
+    trainingId: req.body.trainingId,
+    status: "successful",
+  });
+
+  if (hasPaid) {
+    return res.status(400).json({
+      message: `user has paid for the course`,
+    });
+  }
+
+  // check if training exists
   const training = await Course.findOne({ trainingId: req.body.trainingId });
 
   if (!training) {
@@ -29,6 +43,7 @@ export const initPayment = async (req: Request, res: Response) => {
   }
 
   try {
+    // create payment in DB, status - pending
     const payment = await Payments.create({
       learnerId: req.user!.learnerId,
       amount: training.amount, //
@@ -39,6 +54,7 @@ export const initPayment = async (req: Request, res: Response) => {
       phoneNumber: req.user!.phoneNumber,
     });
 
+    // initialize payment in flutterwave
     const { data } = await axios({
       method: "post",
       url: "https://api.flutterwave.com/v3/payments",
@@ -50,8 +66,7 @@ export const initPayment = async (req: Request, res: Response) => {
         amount: training.amount,
         payment_options: "card",
         currency: "NGN",
-        redirect_url:
-          "https://webhook.site/9d0b00ba-9a69-44fa-a43d-a82c33c36fdc",
+        redirect_url: req.body.redirectUrl,
         meta: {
           consumer_id: req.body.learnerId,
         },
@@ -66,9 +81,8 @@ export const initPayment = async (req: Request, res: Response) => {
         },
       },
     });
-    // webhook_url:
-    //   "https://webhook.site/cac2721e-3e82-4423-8c3e-d1005ec12bc9",
 
+    // send payment link to client
     res.status(201).json({
       message: "Payment initiated successfully",
       data: payment,
@@ -84,6 +98,7 @@ export const initPayment = async (req: Request, res: Response) => {
   }
 };
 
+// web hook to confirm payment and update database
 export const flutterHook = async (req: Request, res: Response) => {
   // retrieve the signature from the header
   const hash = req.headers["verif-hash"];
@@ -97,21 +112,14 @@ export const flutterHook = async (req: Request, res: Response) => {
 
     if (hash !== secret_hash) {
       // silently exit, or check that you are passing the right hash on your server.
-      console.log("hash !== secret_hash");
-      console.log(hash);
-      console.log(process.env.MY_HASH as string);
     } else {
-      // update transaction status
-      console.log("update transaction status");
       res.status(200).end();
       await Payments.findByIdAndUpdate(req.body.txRef, {
         flwRef: req.body.flwRef,
         status: req.body.status,
+        transactionID: req.body.id,
       });
       console.log(req.body);
-
-      console.log("update transaction status");
-      console.log("req.body, I Hit it fast");
 
       if (req.body.status === "successful") {
         console.log("update mission centre");
@@ -130,4 +138,14 @@ export const flutterHook = async (req: Request, res: Response) => {
       // update mission centre as course purchased
     }
   }
+};
+
+export const verifyPayment = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    
+  } catch (e: any) {}
 };

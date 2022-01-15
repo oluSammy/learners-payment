@@ -24,7 +24,6 @@ const paymentSchema = new mongoose.Schema(
     status: {
       type: String,
       default: "pending",
-      enum: ["pending", "success", "failed"],
     },
     trainingId: {
       type: String,
@@ -33,6 +32,7 @@ const paymentSchema = new mongoose.Schema(
       type: String,
     },
     flwRef: String,
+    transactionID: String,
   },
   {
     timestamps: true,
