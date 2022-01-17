@@ -41,10 +41,19 @@ export const validateVerifyIdentityToken = (obj: Joi.Schema) => {
   return schema.validate(obj);
 };
 
-export const validateInitPayment = (obj: Joi.Schema) => {
+export const validateSingleInitPayment = (obj: Joi.Schema) => {
   const schema = Joi.object({
     trainingId: Joi.string().required(),
-    redirectUrl: Joi.string().required(),
+    frontendRedirectUrl: Joi.string().required(),
+  });
+
+  return schema.validate(obj);
+};
+
+export const validateMultipleInitPayment = (obj: Joi.Schema) => {
+  const schema = Joi.object({
+    moduleId: Joi.string().required(),
+    frontendRedirectUrl: Joi.string().required(),
   });
 
   return schema.validate(obj);
@@ -52,9 +61,10 @@ export const validateInitPayment = (obj: Joi.Schema) => {
 
 export const validateCreateCourse = (obj: Joi.Schema) => {
   const schema = Joi.object({
-    trainingId: Joi.string().required(),
+    trainingId: Joi.string(),
     title: Joi.string().required(),
     amount: Joi.number().required(),
+    moduleId: Joi.string(),
   });
 
   return schema.validate(obj);

@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-// Define the schema for the course model
 const courseSchema = new mongoose.Schema({
   trainingId: {
     type: String,
@@ -13,6 +12,10 @@ const courseSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: true,
+  },
+  moduleId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "CourseModule",
   },
 });
 

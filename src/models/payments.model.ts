@@ -26,10 +26,16 @@ const paymentSchema = new mongoose.Schema(
       default: "pending",
     },
     trainingId: {
-      type: String,
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
+      required: true,
     },
     phoneNumber: {
       type: String,
+    },
+    paymentType: {
+      type: String,
+      enum: ["single", "module"],
+      required: true,
     },
     flwRef: String,
     transactionID: String,
