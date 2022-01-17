@@ -111,14 +111,17 @@ export const flutterHook = async (req: Request, res: Response) => {
     } else {
       res.status(200).end();
 
+      console.log(req.body);
+
+      await Payments.findByIdAndUpdate(req.body.txRef, {
+        flwRef: req.body.flwRef,
+        status: req.body.status,
+        transactionID: req.body.id,
+      });
+
       if (req.body.status === "successful") {
         console.log("update mission centre");
 
-        await Payments.findByIdAndUpdate(req.body.txRef, {
-          flwRef: req.body.flwRef,
-          status: req.body.status,
-          transactionID: req.body.id,
-        });
         // update learner status
         // await Course.findOneAndUpdate(
         //   { trainingId: req.body.meta.consumer_id },
