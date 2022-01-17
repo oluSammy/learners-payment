@@ -98,6 +98,8 @@ export const flutterHook = async (req: Request, res: Response) => {
   // retrieve the signature from the header
   const hash = req.headers["verif-hash"];
 
+  console.log(req.body);
+
   if (!hash) {
     // discard the request,only a post with the right Flutterwave signature header gets our attention
     res.status(400).end();
@@ -110,8 +112,6 @@ export const flutterHook = async (req: Request, res: Response) => {
       res.status(400).end();
     } else {
       res.status(200).end();
-
-      console.log(req.body);
 
       await Payments.findByIdAndUpdate(req.body.txRef, {
         flwRef: req.body.flwRef,
