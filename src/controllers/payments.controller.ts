@@ -95,6 +95,8 @@ export const initPayment = async (req: Request, res: Response) => {
 
 // web hook to confirm payment and update database
 export const flutterHook = async (req: Request, res: Response) => {
+  console.log("LIONHDHDHDDDJKEJKioWTF!");
+
   // retrieve the signature from the header
   const hash = req.headers["verif-hash"];
 
@@ -102,6 +104,7 @@ export const flutterHook = async (req: Request, res: Response) => {
 
   if (!hash) {
     // discard the request,only a post with the right Flutterwave signature header gets our attention
+    console.log("NO HASH");
     res.status(400).end();
   } else {
     // Get signature stored as env variable on your server
@@ -109,8 +112,10 @@ export const flutterHook = async (req: Request, res: Response) => {
 
     if (hash !== secret_hash) {
       // silently exit, or check that you are passing the right hash on your server.
+      console.log("HASH IS WRONG");
       res.status(400).end();
     } else {
+      console.log("HASH DEY");
       res.status(200).end();
 
       await Payments.findByIdAndUpdate(req.body.txRef, {
