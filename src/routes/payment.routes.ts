@@ -9,10 +9,10 @@ import { protectRoute } from "../controllers/auth.controller";
 
 const router = express.Router();
 
-router.use(protectRoute);
-
-router.post("/init", initPayment);
 router.post("/hook", flutterHook);
+
+router.use(protectRoute);
+router.post("/init", initPayment);
 router.get("/", getUserTrainings);
 router.get("/verify/:id", verifyPayment);
 
