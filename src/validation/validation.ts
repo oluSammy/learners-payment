@@ -59,6 +59,15 @@ export const validateMultipleInitPayment = (obj: Joi.Schema) => {
   return schema.validate(obj);
 };
 
+export const validateCreateModule = (obj: Joi.Schema) => {
+  const schema = Joi.object({
+    title: Joi.string().required(),
+    amount: Joi.number().min(100).required(),
+  });
+
+  return schema.validate(obj);
+};
+
 export const validateCreateCourse = (obj: Joi.Schema) => {
   const schema = Joi.object({
     trainingId: Joi.string(),

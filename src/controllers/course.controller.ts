@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { validateCreateCourse } from "../validation/validation";
 import Course from "../models/courses.model";
 
-export const courseController = async (req: Request, res: Response) => {
+export const createCourse = async (req: Request, res: Response) => {
   const { error } = validateCreateCourse(req.body);
 
   if (error) {

@@ -1,12 +1,15 @@
 import express from "express";
 import { protectRoute } from "../controllers/auth.controller";
-import { createCourse, getAllCourses } from "../controllers/course.controller";
+import {
+  createCourseModule,
+  getAllModules,
+} from "../controllers/courseModule.controller";
 
 const router = express.Router();
 
 router.use(protectRoute);
 
-router.post("/", createCourse);
-router.get("/", getAllCourses);
+router.post("/", createCourseModule);
+router.get("/", getAllModules);
 
 export default router;

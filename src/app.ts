@@ -28,10 +28,14 @@ app.use(express.static(path.join(__dirname, "public")));
 // connect Db
 connectDb();
 
+app.get("/", (__, res) => {
+  res.send("API is live and running");
+});
+
 app.use("/api/v1", indexRouter);
 
-app.use("/", (__, res) => {
-  res.send("API is live and running");
+app.use("*", (req, res) => {
+  res.send(`${req.url} does not exist on this server`);
 });
 
 // catch 404 and forward to error handler
