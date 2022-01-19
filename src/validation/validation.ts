@@ -68,6 +68,16 @@ export const validateCreateModule = (obj: Joi.Schema) => {
   return schema.validate(obj);
 };
 
+export const validateCartPayment = (obj: Joi.Schema) => {
+  const schema = Joi.object({
+    moduleIds: Joi.array().items(Joi.string()),
+    singleCourseIds: Joi.array().items(Joi.string()),
+    frontendRedirectUrl: Joi.string().required(),
+  });
+
+  return schema.validate(obj);
+};
+
 export const validateCreateCourse = (obj: Joi.Schema) => {
   const schema = Joi.object({
     trainingId: Joi.string(),

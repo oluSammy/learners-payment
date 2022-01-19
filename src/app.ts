@@ -35,7 +35,7 @@ app.get("/", (__, res) => {
 app.use("/api/v1", indexRouter);
 
 app.use("*", (req, res) => {
-  res.send(`${req.url} does not exist on this server`);
+  res.send(`cannot find ${req.url} on this server`);
 });
 
 // catch 404 and forward to error handler

@@ -34,11 +34,14 @@ const paymentSchema = new mongoose.Schema(
     },
     paymentType: {
       type: String,
-      enum: ["single", "module"],
+      enum: ["single", "module", "cart"],
       required: true,
     },
     flwRef: String,
     transactionID: String,
+    moduleId: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
+    },
   },
   {
     timestamps: true,

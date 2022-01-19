@@ -3,9 +3,11 @@ import Payments from "../models/payments.model";
 import {
   validateMultipleInitPayment,
   validateSingleInitPayment,
+  validateCartPayment,
 } from "../validation/validation";
 import axios from "axios";
 import Course from "../models/courses.model";
+import CourseModule from "../models/courseModule.model";
 
 export const initPayment = async (req: Request, res: Response) => {
   // verify req body
@@ -109,22 +111,25 @@ export const initModulePayment = async (req: Request, res: Response) => {
   // check if user has already paid for a module
   const hasPaid = await Payments.findOne({
     learnerId: req.user!.learnerId,
-    moduleId: req.body.moduleId,
     status: "successful",
+    moduleId: req.body.moduleId,
   });
+
+  // console.log(req.body.moduleId, req.user!.learnerId);
+
+  // console.log(hasPaid);
 
   if (hasPaid) {
     return res.status(400).json({
-      message: `user has paid for the course`,
+      message: `user has paid for the module`,
     });
   }
-
   // check if training exists
-  const module = await Course.findById(req.body.moduleId);
+  const module = await CourseModule.findById(req.body.moduleId);
 
   if (!module) {
     return res.status(404).json({
-      message: `Module not found`,
+      message: `module not found`,
     });
   }
 
@@ -149,6 +154,7 @@ export const initModulePayment = async (req: Request, res: Response) => {
       trainingId: courseIds,
       phoneNumber: req.user!.phoneNumber,
       paymentType: "module",
+      moduleId: [module.id],
     });
 
     // initialize payment in flutterwave
@@ -189,6 +195,143 @@ export const initModulePayment = async (req: Request, res: Response) => {
     console.log(e.response.data);
     // console.log(e);
 
+    res.status(500).json({
+      message: "an error occurred",
+    });
+  }
+};
+
+export const initCartPayment = async (req: Request, res: Response) => {
+  try {
+    // validate req body
+    const { error } = validateCartPayment(req.body);
+
+    if (error) {
+      return res.status(400).json({
+        message: `${error.message}`,
+      });
+    }
+
+    let total = 0;
+    let trainingIds: any = [];
+
+    // check if user has paid for the module
+    if (req.body.moduleIds) {
+      const hasPaid = await Payments.findOne({
+        learnerId: req.user!.learnerId,
+        status: "successful",
+        moduleId: req.body.moduleIds,
+      });
+
+      if (hasPaid) {
+        return res.status(400).json({
+          status: "error",
+          message: "user has already paid for this module",
+          data: hasPaid,
+        });
+      }
+
+      const allModules = await CourseModule.find({
+        _id: {
+          $in: req.body.moduleIds,
+        },
+      });
+
+      total += allModules.reduce((prev, curr) => {
+        return prev + curr.amount;
+      }, 0);
+
+      const courses = await Course.find({
+        moduleId: {
+          $in: req.body.moduleIds,
+        },
+      });
+
+      courses.forEach((course: any) => {
+        trainingIds.push(course._id.toString());
+      });
+    }
+
+    // check if user has paid for the course
+    if (req.body.singleCourseIds) {
+      const hasPaid = await Payments.findOne({
+        learnerId: req.user!.learnerId,
+        status: "successful",
+        trainingId: {
+          $all: req.body.singleCourseIds,
+        },
+      });
+
+      if (hasPaid) {
+        return res.status(400).json({
+          status: "error",
+          message: "user has already paid for this course",
+          data: hasPaid,
+        });
+      }
+
+      // get all courses in training ids to determine total price
+      // const singleCoursesTotal =
+      const courses = await Course.find({
+        _id: {
+          $in: req.body.singleCourseIds,
+        },
+      });
+
+      total += courses.reduce((prev, curr) => {
+        return prev + curr.amount;
+      }, 0);
+
+      trainingIds = [...trainingIds, ...req.body.singleCourseIds];
+    }
+
+    const payment = await Payments.create({
+      learnerId: req.user!.learnerId,
+      amount: total,
+      name: req.user!.login,
+      email: req.user!.email,
+      trainingTitle: "trainingIds",
+      trainingId: trainingIds,
+      phoneNumber: req.user!.phoneNumber,
+      paymentType: "cart",
+      moduleId: req.body.moduleIds,
+    });
+
+    // initialize payment in flutterwave
+    const { data } = await axios({
+      method: "post",
+      url: "https://api.flutterwave.com/v3/payments",
+      headers: {
+        Authorization: `Bearer ${process.env.FLUTTERWAVE_PRIVATE_KEY}`,
+      },
+      data: {
+        tx_ref: payment._id,
+        amount: total,
+        payment_options: "card",
+        currency: "NGN",
+        redirect_url: req.body.frontendRedirectUrl,
+        meta: {
+          consumer_id: req.user!.learnerId,
+        },
+        customer: {
+          email: req.user!.email,
+          phonenumber: req.user!.phoneNumber,
+          name: req.user!.login,
+        },
+        customizations: {
+          title: "module.title",
+          description: `payment for cart`,
+        },
+      },
+    });
+
+    res.status(200).json({
+      message: "looking good",
+      data: payment,
+      link: data.data.link,
+    });
+  } catch (e: any) {
+    console.log(e);
     res.status(500).json({
       message: "an error occurred",
     });

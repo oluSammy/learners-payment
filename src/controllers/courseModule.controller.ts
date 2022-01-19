@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { validateCreateModule } from "../validation/validation";
 import CourseModule from "../models/courseModule.model";
+import Course from "../models/courses.model";
 
 export const createCourseModule = async (req: Request, res: Response) => {
   console.log(req.user);
@@ -44,3 +45,20 @@ export const getAllModules = async (req: Request, res: Response) => {
   }
 };
 
+export const getModuleCourses = async (req: Request, res: Response) => {
+  try {
+    const { moduleId } = req.params;
+
+    const courses = await Course.find({ moduleId });
+
+    res.status(200).json({
+      message: "success",
+      data: courses,
+    });
+  } catch (e: any) {
+    res.status(500).json({
+      status: "error",
+      message: "an error occurred",
+    });
+  }
+};

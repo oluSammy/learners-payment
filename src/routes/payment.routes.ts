@@ -3,6 +3,8 @@ import {
   initPayment,
   verifyPayment,
   getUserTrainings,
+  initModulePayment,
+  initCartPayment,
 } from "./../controllers/payments.controller";
 import express from "express";
 import { protectRoute } from "../controllers/auth.controller";
@@ -13,6 +15,8 @@ router.post("/hook", flutterHook);
 
 router.use(protectRoute);
 router.post("/init", initPayment);
+router.post("/moduleinit", initModulePayment);
+router.post("/cart-payment-init", initCartPayment);
 router.get("/", getUserTrainings);
 router.get("/verify/:id", verifyPayment);
 
