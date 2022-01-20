@@ -40,7 +40,7 @@ const paymentSchema = new mongoose.Schema(
     flwRef: String,
     transactionID: String,
     moduleId: {
-      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: "CourseModule" }],
     },
   },
   {

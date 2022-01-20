@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Cart from "../models/cart.model";
+import Payments from "../models/payments.model";
 import { validateAddToCart } from "../validation/validation";
 
 export const addToCart = async (req: Request, res: Response) => {
@@ -12,6 +13,32 @@ export const addToCart = async (req: Request, res: Response) => {
       });
     }
 
+    if (req.body.type === "course") {
+      const hasPaid = await Payments.findOne({
+        learnerId: req.user!.learnerId,
+        status: "successful",
+        moduleId: req.body.item,
+      });
+
+      if (hasPaid) {
+        return res.status(400).json({
+          message: `user has paid for the module`,
+        });
+      }
+    } else {
+      const hasPaid = await Payments.findOne({
+        learnerId: req.user!.learnerId,
+        trainingId: req.body.item,
+        status: "successful",
+      });
+
+      if (hasPaid) {
+        return res.status(400).json({
+          message: `user has paid for the course`,
+        });
+      }
+    }
+
     const cart = await Cart.create({
       ...req.body,
       user: req.user!._id,
@@ -22,8 +49,14 @@ export const addToCart = async (req: Request, res: Response) => {
       message: "Successfully added to cart",
       data: cart,
     });
-  } catch (e) {
-    res.status(500).json({ message: "e.message" });
+  } catch (e: any) {
+    console.log(e.code);
+    if (e.code === 11000) {
+      return res.status(400).json({
+        message: "Item already in cart",
+      });
+    }
+    res.status(500).json({ message: "an error occurred" });
   }
 };
 
@@ -41,7 +74,7 @@ export const removeItemFromCart = async (req: Request, res: Response) => {
       message: "Successfully removed from cart",
     });
   } catch (e) {
-    res.status(500).json({ message: "e.message" });
+    res.status(500).json({ message: "an error occurred" });
   }
 };
 
@@ -53,7 +86,7 @@ export const clearCart = async (req: Request, res: Response) => {
       message: "Successfully cleared from cart",
     });
   } catch (e) {
-    res.status(500).json({ message: "e.message" });
+    res.status(500).json({ message: "an error occurred" });
   }
 };
 
@@ -68,6 +101,6 @@ export const getCartOfAUser = async (req: Request, res: Response) => {
       data: cartItems,
     });
   } catch (e) {
-    res.status(500).json({ message: "e.message" });
+    res.status(500).json({ message: "an error occurred" });
   }
 };

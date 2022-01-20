@@ -8,10 +8,9 @@ import {
 
 const router = express.Router();
 
-router.use(protectRoute);
-
 router.post("/", createCourseModule);
 router.get("/", getAllModules);
-router.get("/:moduleId", getModuleCourses);
+
+router.get("/:moduleId", protectRoute, getModuleCourses);
 
 export default router;

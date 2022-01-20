@@ -4,9 +4,7 @@ import { createCourse, getAllCourses } from "../controllers/course.controller";
 
 const router = express.Router();
 
-router.use(protectRoute);
-
-router.post("/", createCourse);
+router.post("/", protectRoute, createCourse);
 router.get("/", getAllCourses);
 
 export default router;

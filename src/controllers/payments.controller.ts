@@ -9,6 +9,11 @@ import axios from "axios";
 import Course from "../models/courses.model";
 import CourseModule from "../models/courseModule.model";
 
+/**
+ * TODO
+ * remove from cart after payment
+ */
+
 export const initPayment = async (req: Request, res: Response) => {
   // verify req body
   const { error } = validateSingleInitPayment(req.body);
@@ -114,10 +119,6 @@ export const initModulePayment = async (req: Request, res: Response) => {
     status: "successful",
     moduleId: req.body.moduleId,
   });
-
-  // console.log(req.body.moduleId, req.user!.learnerId);
-
-  // console.log(hasPaid);
 
   if (hasPaid) {
     return res.status(400).json({
@@ -422,11 +423,25 @@ export const getUserTrainings = async (req: Request, res: Response) => {
     const payments = await Payments.find({
       learnerId: req.user!.learnerId,
       status: "successful",
-    }).select("-learnerId -name -phoneNumber -createdAt -flwRef -__v");
+    })
+      .select("-learnerId -name -phoneNumber -createdAt -flwRef -__v")
+      .populate({ path: "trainingId" })
+      .populate({ path: "moduleId" });
+
+    let allTrainings: string[] | [] = [];
+    let allModules: string[] | [] = [];
+
+    payments.forEach((payment: any) => {
+      allTrainings = [...allTrainings, ...payment.trainingId];
+      allModules = [...allModules, ...payment.moduleId];
+    });
 
     res.status(200).json({
       status: "success",
-      data: payments,
+      data: {
+        modules: allTrainings,
+        courses: allModules,
+      },
     });
   } catch (e) {
     res.status(500).json({

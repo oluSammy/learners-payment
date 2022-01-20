@@ -9,7 +9,6 @@ const cartSchema = new mongoose.Schema<ICart>({
   },
   item: {
     type: mongoose.Schema.Types.ObjectId,
-    unique: true,
     required: true,
     refPath: "type",
   },
@@ -25,6 +24,8 @@ const cartSchema = new mongoose.Schema<ICart>({
 
 //   next();
 // });
+
+cartSchema.index({ user: 1, item: 1 }, { unique: true });
 
 const Cart = mongoose.model<ICart>("Cart", cartSchema);
 
