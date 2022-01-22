@@ -1,5 +1,5 @@
+import { protectRoute } from './../controllers/auth.controller';
 import express from "express";
-import { protectRoute } from "../controllers/auth.controller";
 import {
   createCourseModule,
   getAllModules,
@@ -8,9 +8,9 @@ import {
 
 const router = express.Router();
 
-router.post("/", createCourseModule);
+router.post("/", protectRoute, createCourseModule);
 router.get("/", getAllModules);
 
-router.get("/:moduleId", protectRoute, getModuleCourses);
+router.get("/:moduleId", getModuleCourses);
 
 export default router;
