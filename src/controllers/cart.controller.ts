@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import Cart from "../models/cart.model";
+import CourseModule from "../models/courseModule.model";
+import Course from "../models/courses.model";
 import Payments from "../models/payments.model";
 import { validateAddToCart } from "../validation/validation";
 
@@ -14,6 +16,16 @@ export const addToCart = async (req: Request, res: Response) => {
     }
 
     if (req.body.type === "course") {
+      // check if module exists
+      const module = await CourseModule.findById(req.body.item);
+
+      if (!module) {
+        return res.status(404).json({
+          message: `Course with the id ${req.body.item} not found`,
+        });
+      }
+
+      // check if user has already paid for this
       const hasPaid = await Payments.findOne({
         learnerId: req.user!.learnerId,
         status: "successful",
@@ -26,6 +38,15 @@ export const addToCart = async (req: Request, res: Response) => {
         });
       }
     } else {
+      // check if module exists
+      const course = await Course.findById(req.body.item);
+
+      if (!course) {
+        return res.status(404).json({
+          message: `Module with the id ${req.body.item} not found`,
+        });
+      }
+
       const hasPaid = await Payments.findOne({
         learnerId: req.user!.learnerId,
         trainingId: req.body.item,
@@ -62,11 +83,14 @@ export const addToCart = async (req: Request, res: Response) => {
 
 export const removeItemFromCart = async (req: Request, res: Response) => {
   try {
-    const cartItem = await Cart.findByIdAndDelete(req.params.id);
+    const cartItem = await Cart.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user!._id,
+    });
 
     if (!cartItem) {
       return res.status(404).json({
-        message: "Cart not found",
+        message: "item not found",
       });
     }
 
