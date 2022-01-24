@@ -114,7 +114,8 @@ const verifyAuthToken = async (learnerId: string, token: string) => {
         {
           learnerId,
           token,
-        }
+        },
+        "post"
       ),
       data: { learnerId, token },
     });
@@ -162,18 +163,17 @@ export const createLearner = async (req: Request, res: Response) => {
       url: `${process.env.MISSION_CENTER_BASE_URL}/learner`,
       headers: generateHeader(
         `${process.env.MISSION_CENTER_BASE_URL}/learner`,
-        req.body
+        req.body,
+        "post"
       ),
       data: req.body,
     });
 
-    console.log(data.response);
-
     // add learner to db
     const learner = await Learner.create({
       login: req.body.login,
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
       email: req.body.email,
       password: req.body.password,
       learnerId: data.response.learnerId,
@@ -230,6 +230,18 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
+    const { data } = await axios({
+      method: "GET",
+      url: `${process.env.MISSION_CENTER_BASE_URL}/learner/${learner.learnerId}`,
+      headers: generateHeader(
+        `${process.env.MISSION_CENTER_BASE_URL}/learner/${learner.learnerId}`,
+        "",
+        "get"
+      ),
+    });
+
+    console.log("data", data);
+
     // const authToken = await generateAuthToken(learner.learnerId);
     const token = generateAppToken(req.body.email);
 
@@ -238,7 +250,21 @@ export const login = async (req: Request, res: Response) => {
       data: learner,
       token,
     });
-  } catch (e) {
+  } catch (e: any) {
+    console.log(e.response.data);
+
+    if (
+      e.response &&
+      e.response.data &&
+      e.response.data.meta.msg === "LEARNER_NOT_FOUND"
+    ) {
+      return res.status(400).json({
+        message: "learner no longer exist",
+      });
+    }
+
+    // console.log(e);
+
     return res.status(500).json({
       message: "an error occurred",
     });

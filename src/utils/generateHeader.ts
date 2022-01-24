@@ -1,15 +1,22 @@
 import crypto from "crypto";
 
-export const generateHeader = (url: string, body: Record<string, any>) => {
+export const generateHeader = (
+  url: string,
+  body: Record<string, any> | "",
+  method: "post" | "get"
+) => {
   const secret = process.env.TOM_API_SECRET;
   const RTS = Date.now().toString();
   const APP = process.env.TOM_APP_ID;
   const REQUEST_BODY = JSON.stringify(body);
   const REQUEST_URL = url;
 
+  const reqPayload =
+    method === "post" ? REQUEST_BODY + REQUEST_URL : REQUEST_URL;
+
   const REQUEST_HASH = crypto
     .createHash("md5")
-    .update(REQUEST_BODY + REQUEST_URL)
+    .update(reqPayload)
     .digest("hex");
 
   const NONCE = Date.now().toString() + Math.random().toString();
@@ -24,5 +31,6 @@ export const generateHeader = (url: string, body: Record<string, any>) => {
     "X-TOM-RTS": RTS,
     "X-TOM-NONCE": NONCE,
     "X-TOM-API-HASH": hash,
+    "X-TOM-APPLICATION-LANGUAGE": "fr",
   };
 };
