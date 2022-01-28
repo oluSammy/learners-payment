@@ -24,7 +24,7 @@ export const initPayment = async (req: Request, res: Response) => {
     });
   }
 
-  // check if user has already paid for a course
+  // // // check if user has already paid for a course
   const hasPaid = await Payments.findOne({
     learnerId: req.user!.learnerId,
     trainingId: req.body.trainingId,
