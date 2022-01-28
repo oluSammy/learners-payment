@@ -23,6 +23,7 @@ export const initPayment = async (req: Request, res: Response) => {
       message: `${error.message}`,
     });
   }
+  try {
 
   // // // check if user has already paid for a course
   const hasPaid = await Payments.findOne({
@@ -46,7 +47,6 @@ export const initPayment = async (req: Request, res: Response) => {
     });
   }
 
-  try {
     // create payment in DB, status - pending
     const payment = await Payments.create({
       learnerId: req.user!.learnerId,
@@ -112,6 +112,7 @@ export const initModulePayment = async (req: Request, res: Response) => {
       message: `${error.message}`,
     });
   }
+  try {
 
   // check if user has already paid for a module
   const hasPaid = await Payments.findOne({
@@ -125,7 +126,7 @@ export const initModulePayment = async (req: Request, res: Response) => {
       message: `user has paid for the module`,
     });
   }
-  // check if training exists
+  // // check if training exists
   const module = await CourseModule.findById(req.body.moduleId);
 
   if (!module) {
@@ -145,7 +146,6 @@ export const initModulePayment = async (req: Request, res: Response) => {
 
   const courseIds = trainings.map((course) => course._id);
 
-  try {
     const payment = await Payments.create({
       learnerId: req.user!.learnerId,
       amount: module.amount,
