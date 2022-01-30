@@ -19,6 +19,9 @@ export const validateSignup = (obj: Joi.Schema) => {
     email: Joi.string().email().required(),
     password: Joi.string().min(6).max(30).required(),
     phoneNumber: Joi.string().required(),
+    location: Joi.string().required(),
+    qualification: Joi.string().required(),
+    age: Joi.number().required(),
   });
 
   return schema.validate(obj);

@@ -158,16 +158,29 @@ export const createLearner = async (req: Request, res: Response) => {
     }
 
     // create learner on mission center
+    const mcData = {
+      firstname: req.body.firstname,
+      login: req.body.login,
+      lastname: req.body.lastname,
+      email: req.body.email,
+      password: req.body.password,
+      metadata: {
+        country: "France",
+        company: "My Company",
+      },
+    };
     const { data } = await axios({
       method: "post",
       url: `${process.env.MISSION_CENTER_BASE_URL}/learner`,
       headers: generateHeader(
         `${process.env.MISSION_CENTER_BASE_URL}/learner`,
-        req.body,
+        mcData,
         "post"
       ),
-      data: req.body,
+      data: mcData,
     });
+
+    console.log(data);
 
     // add learner to db
     const learner = await Learner.create({
@@ -178,6 +191,9 @@ export const createLearner = async (req: Request, res: Response) => {
       password: req.body.password,
       learnerId: data.response.learnerId,
       phoneNumber: req.body.phoneNumber,
+      location: req.body.location,
+      qualification: req.body.qualification,
+      age: req.body.age,
     });
 
     learner.password = "";
