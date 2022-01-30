@@ -31,16 +31,24 @@ const learnerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  location: {
+  country: {
     type: String,
     required: true,
   },
-  qualification: {
+  educationalQualification: {
     type: String,
     required: true,
   },
   age: {
     type: Number,
+    required: true,
+  },
+  yearOfGraduation: {
+    type: String,
+    required: true,
+  },
+  stateOfResidence: {
+    type: String,
     required: true,
   },
 });

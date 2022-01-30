@@ -165,8 +165,12 @@ export const createLearner = async (req: Request, res: Response) => {
       email: req.body.email,
       password: req.body.password,
       metadata: {
-        country: "France",
         company: "My Company",
+        country: req.body.country,
+        qualification: req.body.educationalQualification,
+        stateOfResidence: req.body.stateOfResidence,
+        age: req.body.age,
+        yearOfGraduation: req.body.yearOfGraduation,
       },
     };
     const { data } = await axios({
@@ -191,9 +195,11 @@ export const createLearner = async (req: Request, res: Response) => {
       password: req.body.password,
       learnerId: data.response.learnerId,
       phoneNumber: req.body.phoneNumber,
-      location: req.body.location,
-      qualification: req.body.qualification,
+      country: req.body.country,
+      educationalQualification: req.body.educationalQualification,
+      stateOfResidence: req.body.stateOfResidence,
       age: req.body.age,
+      yearOfGraduation: req.body.yearOfGraduation,
     });
 
     learner.password = "";
