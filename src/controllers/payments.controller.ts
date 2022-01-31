@@ -24,28 +24,27 @@ export const initPayment = async (req: Request, res: Response) => {
     });
   }
   try {
-
-  // // // check if user has already paid for a course
-  const hasPaid = await Payments.findOne({
-    learnerId: req.user!.learnerId,
-    trainingId: req.body.trainingId,
-    status: "successful",
-  });
-
-  if (hasPaid) {
-    return res.status(400).json({
-      message: `user has paid for the course`,
+    // // // check if user has already paid for a course
+    const hasPaid = await Payments.findOne({
+      learnerId: req.user!.learnerId,
+      trainingId: req.body.trainingId,
+      status: "successful",
     });
-  }
 
-  // check if training exists
-  const training = await Course.findById(req.body.trainingId);
+    if (hasPaid) {
+      return res.status(400).json({
+        message: `user has paid for the course`,
+      });
+    }
 
-  if (!training) {
-    return res.status(404).json({
-      message: `Training not found`,
-    });
-  }
+    // check if training exists
+    const training = await Course.findById(req.body.trainingId);
+
+    if (!training) {
+      return res.status(404).json({
+        message: `Training not found`,
+      });
+    }
 
     // create payment in DB, status - pending
     const payment = await Payments.create({
@@ -95,7 +94,6 @@ export const initPayment = async (req: Request, res: Response) => {
     });
   } catch (e: any) {
     console.log(e.response.data);
-    // console.log(e);
 
     res.status(500).json({
       message: "an error occurred",
@@ -111,40 +109,39 @@ export const initModulePayment = async (req: Request, res: Response) => {
     return res.status(400).json({
       message: `${error.message}`,
     });
-  }
+  } //req.body.singleCourseIds
   try {
-
-  // check if user has already paid for a module
-  const hasPaid = await Payments.findOne({
-    learnerId: req.user!.learnerId,
-    status: "successful",
-    moduleId: req.body.moduleId,
-  });
-
-  if (hasPaid) {
-    return res.status(400).json({
-      message: `user has paid for the module`,
+    // check if user has already paid for a module
+    const hasPaid = await Payments.findOne({
+      learnerId: req.user!.learnerId,
+      status: "successful",
+      moduleId: req.body.moduleId,
     });
-  }
-  // // check if training exists
-  const module = await CourseModule.findById(req.body.moduleId);
 
-  if (!module) {
-    return res.status(404).json({
-      message: `module not found`,
-    });
-  }
+    if (hasPaid) {
+      return res.status(400).json({
+        message: `user has paid for the module`,
+      });
+    }
+    // // check if training exists
+    const module = await CourseModule.findById(req.body.moduleId);
 
-  // get all trainings in module
-  const trainings = await Course.find({ moduleId: req.body.moduleId });
+    if (!module) {
+      return res.status(404).json({
+        message: `module not found`,
+      });
+    }
 
-  if (!trainings.length) {
-    return res.status(404).json({
-      message: "this module has no course",
-    });
-  }
+    // get all trainings in module
+    const trainings = await Course.find({ moduleId: req.body.moduleId });
 
-  const courseIds = trainings.map((course) => course._id);
+    if (!trainings.length) {
+      return res.status(404).json({
+        message: "this module has no course",
+      });
+    }
+
+    const courseIds = trainings.map((course) => course._id);
 
     const payment = await Payments.create({
       learnerId: req.user!.learnerId,
@@ -217,7 +214,7 @@ export const initCartPayment = async (req: Request, res: Response) => {
     let trainingIds: any = [];
 
     // check if user has paid for the module
-    if (req.body.moduleIds) {
+    if (req.body.moduleIds && req.body.moduleIds.length > 0) {
       const hasPaid = await Payments.findOne({
         learnerId: req.user!.learnerId,
         status: "successful",
@@ -254,7 +251,7 @@ export const initCartPayment = async (req: Request, res: Response) => {
     }
 
     // check if user has paid for the course
-    if (req.body.singleCourseIds) {
+    if (req.body.singleCourseIds && req.body.singleCourseIds.length > 0) {
       const hasPaid = await Payments.findOne({
         learnerId: req.user!.learnerId,
         status: "successful",
