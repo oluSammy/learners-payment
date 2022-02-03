@@ -9,6 +9,18 @@ const courseModuleSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  caption: {
+    type: String,
+    required: true,
+  },
+  trainings: {
+    type: [String],
+    required: true,
+  },
+  objectives: {
+    type: [String],
+    required: true,
+  },
 });
 
 const CourseModule = mongoose.model("CourseModule", courseModuleSchema);

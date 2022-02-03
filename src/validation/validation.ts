@@ -68,6 +68,21 @@ export const validateCreateModule = (obj: Joi.Schema) => {
   const schema = Joi.object({
     title: Joi.string().required(),
     amount: Joi.number().min(100).required(),
+    caption: Joi.string().required(),
+    trainings: Joi.array().items(Joi.string()).required(),
+    objectives: Joi.array().items(Joi.string()).required(),
+  });
+
+  return schema.validate(obj);
+};
+
+export const validateUpdateModule = (obj: Joi.Schema) => {
+  const schema = Joi.object({
+    title: Joi.string(),
+    amount: Joi.number().min(100),
+    caption: Joi.string(),
+    trainings: Joi.array().items(Joi.string()),
+    objectives: Joi.array().items(Joi.string()),
   });
 
   return schema.validate(obj);
@@ -89,6 +104,14 @@ export const validateCreateCourse = (obj: Joi.Schema) => {
     title: Joi.string().required(),
     amount: Joi.number().required(),
     moduleId: Joi.string(),
+    caption: Joi.string().required(),
+    details: Joi.array().items(
+      Joi.object({
+        id: Joi.number().min(1),
+        module: Joi.string().required(),
+        caption: Joi.string().required(),
+      }).required()
+    ),
   });
 
   return schema.validate(obj);

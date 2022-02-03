@@ -19,6 +19,8 @@ export const createCourse = async (req: Request, res: Response) => {
       data: course,
     });
   } catch (e: any) {
+    console.log(e);
+
     res.status(500).json({
       message: "an error occurred",
     });
