@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import Course from "../models/courses.model";
 import CourseModule from "../models/courseModule.model";
+import { generateHeader } from "../utils/generateHeader";
 
 /**
  * TODO
@@ -356,14 +357,28 @@ export const flutterHook = async (req: Request, res: Response) => {
     } else {
       res.status(200).end();
 
-      await Payments.findByIdAndUpdate(req.body.txRef, {
+      const payment = await Payments.findByIdAndUpdate(req.body.txRef, {
         flwRef: req.body.flwRef,
         status: req.body.status,
         transactionID: req.body.id,
       });
 
       console.log("update mission centre");
+      console.log(payment);
       // update learner status
+
+      // const paymentData = {};
+
+      // const { data } = await axios({
+      //   method: "post",
+      //   url: `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
+      //   headers: generateHeader(
+      //     `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
+      //     paymentData,
+      //     "post"
+      //   ),
+      //   data: paymentData,
+      // });
 
       // txRef, flwRef, amount, status,
       // update mission centre as course purchased
