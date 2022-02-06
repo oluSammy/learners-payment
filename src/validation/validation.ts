@@ -108,7 +108,26 @@ export const validateCreateCourse = (obj: Joi.Schema) => {
     details: Joi.array().items(
       Joi.object({
         id: Joi.number().min(1),
-        module: Joi.string().required(),
+        module: Joi.string(),
+        caption: Joi.string().required(),
+      }).required()
+    ),
+  });
+
+  return schema.validate(obj);
+};
+
+export const validateUpdateCourse = (obj: Joi.Schema) => {
+  const schema = Joi.object({
+    trainingId: Joi.string(),
+    title: Joi.string(),
+    amount: Joi.number(),
+    moduleId: Joi.string(),
+    caption: Joi.string(),
+    details: Joi.array().items(
+      Joi.object({
+        id: Joi.number().min(1),
+        module: Joi.string(),
         caption: Joi.string().required(),
       }).required()
     ),
