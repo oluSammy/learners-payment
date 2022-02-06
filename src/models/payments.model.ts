@@ -29,6 +29,9 @@ const paymentSchema = new mongoose.Schema(
       type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Course" }],
       required: true,
     },
+    missionCenterTrainingId: {
+      type: [String],
+    },
     phoneNumber: {
       type: String,
     },

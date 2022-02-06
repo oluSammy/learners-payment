@@ -143,6 +143,7 @@ export const initModulePayment = async (req: Request, res: Response) => {
     }
 
     const courseIds = trainings.map((course) => course._id);
+    const missionCentreIDs = trainings.map((course) => course.trainingId);
 
     const payment = await Payments.create({
       learnerId: req.user!.learnerId,
@@ -154,6 +155,7 @@ export const initModulePayment = async (req: Request, res: Response) => {
       phoneNumber: req.user!.phoneNumber,
       paymentType: "module",
       moduleId: [module.id],
+      missionCenterTrainingId: missionCentreIDs,
     });
 
     // initialize payment in flutterwave
@@ -213,6 +215,7 @@ export const initCartPayment = async (req: Request, res: Response) => {
 
     let total = 0;
     let trainingIds: any = [];
+    let mcTrainingIds: any = [];
 
     // check if user has paid for the module
     if (req.body.moduleIds && req.body.moduleIds.length > 0) {
@@ -248,6 +251,7 @@ export const initCartPayment = async (req: Request, res: Response) => {
 
       courses.forEach((course: any) => {
         trainingIds.push(course._id.toString());
+        mcTrainingIds.push(course.trainingId);
       });
     }
 
@@ -282,6 +286,10 @@ export const initCartPayment = async (req: Request, res: Response) => {
       }, 0);
 
       trainingIds = [...trainingIds, ...req.body.singleCourseIds];
+      mcTrainingIds = [
+        ...mcTrainingIds,
+        ...courses.map((course) => course.trainingId),
+      ];
     }
 
     const payment = await Payments.create({
@@ -294,6 +302,7 @@ export const initCartPayment = async (req: Request, res: Response) => {
       phoneNumber: req.user!.phoneNumber,
       paymentType: "cart",
       moduleId: req.body.moduleIds,
+      missionCenterTrainingId: mcTrainingIds,
     });
 
     // initialize payment in flutterwave
@@ -370,16 +379,37 @@ export const flutterHook = async (req: Request, res: Response) => {
 
         // const paymentData = {};
 
-        // const { data } = await axios({
-        //   method: "post",
-        //   url: `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
-        //   headers: generateHeader(
-        //     `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
-        //     paymentData,
-        //     "post"
-        //   ),
-        //   data: paymentData,
-        // });
+        const accessDate = new Date();
+        let day = accessDate.getDate().toString();
+        let month = (accessDate.getMonth() + 1).toString();
+        const year = accessDate.getFullYear();
+        day = day.length === 1 ? `0${day}` : day;
+        month = month.length === 1 ? `0${month}` : month;
+
+        if (req.body.status === "successful") {
+          const paymentData = payment.missionCenterTrainingId.map(
+            (id: string) => {
+              return {
+                learnerId: payment.learnerId,
+                trainingId: id,
+                accessSince: `${day}-${month}-${year}`,
+              };
+            }
+          );
+
+          console.log(paymentData);
+
+          // const { data } = await axios({
+          //   method: "post",
+          //   url: `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
+          //   headers: generateHeader(
+          //     `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
+          //     paymentData,
+          //     "post"
+          //   ),
+          //   data: paymentData,
+          // });
+        }
 
         // txRef, flwRef, amount, status,
         // update mission centre as course purchased
