@@ -399,16 +399,18 @@ export const flutterHook = async (req: Request, res: Response) => {
 
           console.log(paymentData);
 
-          // const { data } = await axios({
-          //   method: "post",
-          //   url: `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
-          //   headers: generateHeader(
-          //     `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
-          //     paymentData,
-          //     "post"
-          //   ),
-          //   data: paymentData,
-          // });
+          const { data } = await axios({
+            method: "post",
+            url: `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
+            headers: generateHeader(
+              `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
+              paymentData,
+              "post"
+            ),
+            data: paymentData,
+          });
+
+          console.log(data);
         }
 
         // txRef, flwRef, amount, status,
