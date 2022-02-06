@@ -339,50 +339,54 @@ export const initCartPayment = async (req: Request, res: Response) => {
 
 // web hook to confirm payment and update database
 export const flutterHook = async (req: Request, res: Response) => {
-  // retrieve the signature from the header
-  const hash = req.headers["verif-hash"];
+  try {
+    // retrieve the signature from the header
+    const hash = req.headers["verif-hash"];
 
-  console.log(req.body);
+    console.log(req.body);
 
-  if (!hash) {
-    // discard the request,only a post with the right Flutterwave signature header gets our attention
-    res.status(400).end();
-  } else {
-    // Get signature stored as env variable on your server
-    const secret_hash = process.env.MY_HASH as string;
-
-    if (hash !== secret_hash) {
-      // silently exit, or check that you are passing the right hash on your server.
+    if (!hash) {
+      // discard the request,only a post with the right Flutterwave signature header gets our attention
       res.status(400).end();
     } else {
-      res.status(200).end();
+      // Get signature stored as env variable on your server
+      const secret_hash = process.env.MY_HASH as string;
 
-      const payment = await Payments.findByIdAndUpdate(req.body.txRef, {
-        flwRef: req.body.flwRef,
-        status: req.body.status,
-        transactionID: req.body.id,
-      });
+      if (hash !== secret_hash) {
+        // silently exit, or check that you are passing the right hash on your server.
+        res.status(400).end();
+      } else {
+        res.status(200).end();
 
-      console.log("update mission centre");
-      console.log(payment);
-      // update learner status
+        const payment = await Payments.findByIdAndUpdate(req.body.txRef, {
+          flwRef: req.body.flwRef,
+          status: req.body.status,
+          transactionID: req.body.id,
+        });
 
-      // const paymentData = {};
+        console.log("update mission centre");
+        console.log(payment);
+        // update learner status
 
-      // const { data } = await axios({
-      //   method: "post",
-      //   url: `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
-      //   headers: generateHeader(
-      //     `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
-      //     paymentData,
-      //     "post"
-      //   ),
-      //   data: paymentData,
-      // });
+        // const paymentData = {};
 
-      // txRef, flwRef, amount, status,
-      // update mission centre as course purchased
+        // const { data } = await axios({
+        //   method: "post",
+        //   url: `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
+        //   headers: generateHeader(
+        //     `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
+        //     paymentData,
+        //     "post"
+        //   ),
+        //   data: paymentData,
+        // });
+
+        // txRef, flwRef, amount, status,
+        // update mission centre as course purchased
+      }
     }
+  } catch (e) {
+    console.log(e);
   }
 };
 
