@@ -404,10 +404,10 @@ export const flutterHook = async (req: Request, res: Response) => {
             url: `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
             headers: generateHeader(
               `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
-              paymentData,
+              { data: paymentData },
               "post"
             ),
-            data: paymentData,
+            data: { data: paymentData },
           });
 
           console.log(data);
@@ -495,5 +495,31 @@ export const getUserTrainings = async (req: Request, res: Response) => {
     res.status(500).json({
       message: "an error occurred",
     });
+  }
+};
+
+export const testNotify = async (req: Request, res: Response) => {
+  try {
+    console.log(req.body.data);
+    const { data } = await axios({
+      method: "post",
+      url: `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
+      headers: generateHeader(
+        `${process.env.MISSION_CENTER_BASE_URL}/training/access/import`,
+        req.body,
+        "post"
+      ),
+      data: req.body,
+    });
+
+    console.log(data);
+
+    res.status(200).json({
+      message: "ok",
+    });
+  } catch (e: any) {
+    console.log(e.response.data);
+
+    res.send("error");
   }
 };
