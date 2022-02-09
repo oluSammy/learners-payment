@@ -15,9 +15,9 @@ const router = express.Router();
 router.post("/hook", flutterHook);
 
 router.use(protectRoute);
-router.post("/testing", testNotify);
-router.post("/init", initPayment);
-router.post("/moduleinit", initModulePayment);
+// router.post("/testing", testNotify);
+// router.post("/init", initPayment);
+// router.post("/moduleinit", initModulePayment);
 router.post("/cart-payment-init", initCartPayment);
 router.get("/", getUserTrainings);
 router.get("/verify/:id", verifyPayment);

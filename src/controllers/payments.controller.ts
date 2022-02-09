@@ -410,7 +410,7 @@ export const flutterHook = async (req: Request, res: Response) => {
             data: { data: paymentData },
           });
 
-          console.log(data);
+          console.log(JSON.stringify(data));
         }
 
         // txRef, flwRef, amount, status,
