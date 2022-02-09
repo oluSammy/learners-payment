@@ -392,7 +392,7 @@ export const flutterHook = async (req: Request, res: Response) => {
               return {
                 learnerId: payment.learnerId,
                 trainingId: id,
-                accessSince: `${day}-${month}-${year}`,
+                accessSince: `${day}/${month}/${year}`,
               };
             }
           );
